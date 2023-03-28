@@ -18,7 +18,6 @@ if os.getenv('AIOFUTURES_INIT'):
         """
         return _global_executor.submit(func, *args, **kwargs)
 
-
     def sync_to_async(func: Callable, *args) -> asyncio.Future:
         """Run sync function in a thread pool executor and make it awaitable.
 

@@ -35,11 +35,7 @@ Output:
     result 2: ((2,), {'b': 2})
 """
 import asyncio
-from concurrent.futures import (
-    Executor,
-    Future,
-    ThreadPoolExecutor,
-)
+from concurrent.futures import Executor, Future, ThreadPoolExecutor
 from threading import Thread
 from typing import Awaitable, Callable, Optional
 
