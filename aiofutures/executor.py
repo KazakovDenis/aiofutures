@@ -41,7 +41,7 @@ from typing import Awaitable, Callable, Optional
 
 
 class InvalidStateError(Exception):
-    """The same as concurrent.futures.InvalidStateError since Python 3.8."""
+    pass
 
 
 class AsyncExecutor(Executor):
@@ -60,7 +60,7 @@ class AsyncExecutor(Executor):
         self._thread = Thread(target=run, name=self.__class__.__name__, daemon=True)
         self._thread.start()
 
-    def submit(self, task: Callable[..., Awaitable], *args, **kwargs) -> Future:
+    def submit(self, task: Callable[..., Awaitable], *args, **kwargs) -> Future:  # type: ignore[override]
         """Schedule new async task.
 
         :param task: an async task to be scheduled
@@ -77,6 +77,8 @@ class AsyncExecutor(Executor):
         :param task: an async task to be scheduled
         :param args: args to pass to a task
         """
+        if self._stopped:
+            raise InvalidStateError(f'The task was submitted after AsyncExecutor shutdown: {task}')
         return self._loop.run_in_executor(None, task, *args)
 
     def shutdown(self, wait: bool = True, cancel_futures: bool = False) -> None:
@@ -85,6 +87,10 @@ class AsyncExecutor(Executor):
         :param wait: wait for tasks to be finished or stop immediately
         :param cancel_futures: notify tasks to be cancelled
         """
+        # as said in Executor it may be called several times
+        if self._stopped:
+            return
+
         self._stopped = True
         self._loop.stop()
 
@@ -92,7 +98,7 @@ class AsyncExecutor(Executor):
             self.cancel_futures()
 
         self._submit(self._stop_loop, not wait)
-        self._loop = self._thread = None
+        del self._loop, self._thread
 
     def cancel_futures(self) -> None:
         """Cancel all running tasks."""

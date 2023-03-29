@@ -8,6 +8,25 @@ It may be useful when you want to:
 - smoothly migrate your synchronous codebase to asynchronous style
 - decrease a number of threads in your application 
 
+Replace this:
+```python
+from concurrent.futures import ThreadPoolExecutor
+
+with ThreadPoolExecutor() as ex:
+    future = ex.submit(sync_task)
+    result = future.result()
+```
+
+With this:
+```python
+from aiofutures import AsyncExecutor
+
+with AsyncExecutor() as ex:
+    future = ex.submit(async_task)
+    result = future.result()
+```
+
+
 ## Installation
 
 You can install `aiofutures` using pip:
@@ -20,7 +39,7 @@ pip install aiofutures
 
 ### Simple way
 
-Set an environment variable AIOFUTURES_INIT to any value and use shortcuts from the library:
+Set an environment variable `AIOFUTURES_INIT` to any value and use shortcuts from the library:
 
 ```python
 os.environ.setdefault('AIOFUTURES_INIT', '1')
@@ -34,7 +53,7 @@ async def io_bound_task(seconds):
 future = run_async(io_bound_task, 5)
 print(future.result())
 ```
-AIOFUTURES_INIT implicitly initializes a global `AsyncExecutor` and gives you an option to use 
+`AIOFUTURES_INIT` implicitly initializes a global `AsyncExecutor` and gives you an option to use 
 shortcuts `run_async` and `sync_to_async`.
 
 ### Another way
@@ -49,7 +68,7 @@ future = executor.submit(io_bound_task, 5)
 print(future.result())
 ```
 
-For cases when you need to do IO synchronously within async tasks, you can use `sync_to_async`:
+In cases when you need to do IO synchronously within async tasks, you can use `sync_to_async`:
 
 ```python
 from aiofutures import AsyncExecutor, sync_to_async
@@ -60,8 +79,8 @@ async def io_bound_task():
     # or with the shortcut
     # url = await sync_to_async(fetch_url_from_db_sync)
     url = await executor.sync_to_async(fetch_url_from_db_sync)
-    result = await fetch_url_async(url)
-    return result
+    data = await fetch_data(url)
+    return data
 
 future = executor.submit(io_bound_task)
 print(future.result())
