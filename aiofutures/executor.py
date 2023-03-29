@@ -39,9 +39,7 @@ from concurrent.futures import Executor, Future, ThreadPoolExecutor
 from threading import Thread
 from typing import Awaitable, Callable, Optional
 
-
-class InvalidStateError(Exception):
-    pass
+from .exceptions import InvalidStateError
 
 
 class AsyncExecutor(Executor):
