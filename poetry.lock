@@ -92,6 +92,9 @@ files = [
     {file = "coverage-7.2.2.tar.gz", hash = "sha256:36dd42da34fe94ed98c39887b86db9d06777b1c8f860520e21126a75507024f2"},
 ]
 
+[package.dependencies]
+tomli = {version = "*", optional = true, markers = "python_full_version <= \"3.11.0a6\" and extra == \"toml\""}
+
 [package.extras]
 toml = ["tomli"]
 
@@ -423,4 +426,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7"
-content-hash = "7e14d126bb724789b517c42487077dee5e98bd3b8b625462631a0417f6bae2c3"
+content-hash = "fa9f4a0ce6fb7b07db49cb944e88c433abad6f108a0f6d795d3b80412bd38845"

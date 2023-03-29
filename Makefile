@@ -1,10 +1,10 @@
 style:
 	poetry run isort -c .
-	poetry run flake8
+	poetry run pflake8
 	poetry run mypy
 
 test:
-	poetry run coverage run
+	AIOFUTURES_INIT=1 poetry run coverage run
 	poetry run coverage report
 
 publish:

@@ -37,7 +37,7 @@ pip install aiofutures
 
 ## Usage
 
-### Simple way
+### Implicit initialization (global executor)
 
 Set an environment variable `AIOFUTURES_INIT` to any value and use shortcuts from the library:
 
@@ -56,7 +56,7 @@ print(future.result())
 `AIOFUTURES_INIT` implicitly initializes a global `AsyncExecutor` and gives you an option to use 
 shortcuts `run_async` and `sync_to_async`.
 
-### Another way
+### Explicit initialization
 
 Use an instance of the `AsyncExecutor` directly:
 
@@ -84,6 +84,25 @@ async def io_bound_task():
 
 future = executor.submit(io_bound_task)
 print(future.result())
+```
+
+NOTE: You can use sync_to_async within tasks running in the executor only.
+
+### UVLoop
+
+To use with the high performance `uvloop` install it before initialization:
+```python
+# install before the import for the global executor
+import uvloop
+uvloop.install()
+from aiofutures import run_async
+...
+
+# or before an explicit initialization
+import uvloop
+from aiofutures import AsyncExecutor
+uvloop.install()
+executor = AsyncExecutor()
 ```
 
 ## Contribution
