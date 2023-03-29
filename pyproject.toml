@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aiofutures"
-version = "0.1.0"
+version = "0.1.1"
 description = "Smoothly migrate your synchronous codebase to an asynchronous style."
 authors = ["Denis Kazakov <denis@kazakov.ru.net>"]
 license = "MIT"

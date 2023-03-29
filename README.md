@@ -1,4 +1,5 @@
 # Aiofutures
+![Python version](https://img.shields.io/badge/python-3.7%2B-blue)
 [![Tests](https://github.com/KazakovDenis/relatives/actions/workflows/cicd.yml/badge.svg)](https://github.com/KazakovDenis/relatives/actions/workflows/cicd.yml)  
 
 `aiofutures` provides tools to integrate an asynchronous code into your synchronous 
