@@ -1,6 +1,18 @@
 # Aiofutures
-![Python version](https://img.shields.io/badge/python-3.7%2B-blue)
-[![Tests](https://github.com/KazakovDenis/relatives/actions/workflows/cicd.yml/badge.svg)](https://github.com/KazakovDenis/relatives/actions/workflows/cicd.yml)  
+![Python version](https://img.shields.io/badge/Python-3.7%2B-blue)
+[![Tests](https://github.com/KazakovDenis/relatives/actions/workflows/cicd.yml/badge.svg)](https://github.com/KazakovDenis/aiofutures/actions/workflows/cicd.yml) 
+![PyPI - Downloads](https://img.shields.io/pypi/dm/aiofutures)
+
+- [General information](#general-information)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Implicit initialization (global executor)](#implicit-initialization-global-executor)
+  - [Explicit initialization](#explicit-initialization)
+  - [UVLoop](#uvloop)
+  - [Notes](#notes)
+- [Contribution](#contribution)
+
+## General information
 
 `aiofutures` provides tools to integrate an asynchronous code into your synchronous 
 application in a usual and easy way using standard library's `concurrent.futures.Executor` interface.  
@@ -27,6 +39,8 @@ with AsyncExecutor() as ex:
     result = future.result()
 ```
 
+**The former spawns a lot of threads and experiences all cons of GIL, the latter
+spawns the only one async thread (check out [notes](#Notes))** 
 
 ## Installation
 
@@ -105,6 +119,11 @@ from aiofutures import AsyncExecutor
 uvloop.install()
 executor = AsyncExecutor()
 ```
+
+### Notes
+- Take into account that asyncio still ([CPython3.11](https://github.com/python/cpython/blob/4664a7cf689946f0c9854cadee7c6aa9c276a8cf/Lib/asyncio/base_events.py#L867))
+resolves DNS in threads, not asynchronously
+- Any blocking function will block the whole AsyncExecutor
 
 ## Contribution
 All suggestions are welcome!

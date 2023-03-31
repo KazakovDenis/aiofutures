@@ -1,10 +1,19 @@
 [tool.poetry]
 name = "aiofutures"
-version = "0.1.1"
-description = "Smoothly migrate your synchronous codebase to an asynchronous style."
+version = "0.1.2"
+description = "Smoothly migrate your synchronous codebase to the asynchronous style."
 authors = ["Denis Kazakov <denis@kazakov.ru.net>"]
 license = "MIT"
 readme = "README.md"
+homepage = "https://pypi.org/project/aiofutures"
+repository = "https://github.com/KazakovDenis/aiofutures"
+keywords = ["asyncio", "executor", "concurrent", "futures"]
+classifiers = [
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
 
 [tool.poetry.dependencies]
 python = "^3.7"
