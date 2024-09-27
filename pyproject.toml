@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aiofutures"
-version = "0.1.2"
+version = "0.1.3"
 description = "Smoothly migrate your synchronous codebase to the asynchronous style."
 authors = ["Denis Kazakov <denis@kazakov.ru.net>"]
 license = "MIT"
@@ -16,7 +16,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 
 [tool.poetry.group.dev.dependencies]
 coverage = {extras = ["toml"], version = "^7.2.2"}
@@ -53,7 +53,7 @@ exclude = [
     "__pycache__"
 ]
 max-cognitive-complexity = 10
-min-python-version = 3.7
+min-python-version = 3.8
 per-file-ignores = [
     "aiofutures/__init__.py:F401"
 ]
@@ -72,6 +72,6 @@ sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 known_first_party = ["aiofutures", "tests"]
 
 [tool.mypy]
-python_version = "3.7"
+python_version = "3.8"
 warn_unused_configs = true
 files = ["aiofutures"]

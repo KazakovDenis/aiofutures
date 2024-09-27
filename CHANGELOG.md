@@ -1,5 +1,8 @@
 # CHANGELOG
 
+# 0.1.3
+- Deprecate Python 3.7, add Python 3.12
+
 # 0.1.2
 - Just more user-friendly readme & library description: links, classifiers, keywords
 

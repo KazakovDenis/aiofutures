@@ -1,5 +1,5 @@
 # Aiofutures
-![Python version](https://img.shields.io/badge/Python-3.7%2B-blue)
+![Python version](https://img.shields.io/badge/Python-3.8%2B-blue)
 [![Tests](https://github.com/KazakovDenis/relatives/actions/workflows/cicd.yml/badge.svg)](https://github.com/KazakovDenis/aiofutures/actions/workflows/cicd.yml) 
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/aiofutures)
 
@@ -25,8 +25,11 @@ Replace this:
 ```python
 from concurrent.futures import ThreadPoolExecutor
 
+def sync_get_user(user_id):
+    ...
+
 with ThreadPoolExecutor() as ex:
-    future = ex.submit(sync_task)
+    future = ex.submit(sync_get_user)
     result = future.result()
 ```
 
@@ -34,8 +37,11 @@ With this:
 ```python
 from aiofutures import AsyncExecutor
 
+def async_get_user(user_id):
+    ...
+
 with AsyncExecutor() as ex:
-    future = ex.submit(async_task)
+    future = ex.submit(async_get_user)
     result = future.result()
 ```
 
