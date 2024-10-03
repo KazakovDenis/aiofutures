@@ -29,7 +29,7 @@ def sync_get_user(user_id):
     ...
 
 with ThreadPoolExecutor() as ex:
-    future = ex.submit(sync_get_user)
+    future = ex.submit(sync_get_user, user_id)
     result = future.result()
 ```
 
@@ -37,16 +37,16 @@ With this:
 ```python
 from aiofutures import AsyncExecutor
 
-def async_get_user(user_id):
+async def async_get_user(user_id):
     ...
 
 with AsyncExecutor() as ex:
-    future = ex.submit(async_get_user)
+    future = ex.submit(async_get_user, user_id)
     result = future.result()
 ```
 
 **The former spawns a lot of threads and experiences all cons of GIL, the latter
-spawns the only one async thread (check out [notes](#Notes))** 
+spawns the only one async thread (check out [notes](#Notes))**. 
 
 ## Installation
 
@@ -107,7 +107,7 @@ future = executor.submit(io_bound_task)
 print(future.result())
 ```
 
-NOTE: You can use sync_to_async within tasks running in the executor only.
+NOTE: You can use `sync_to_async` within tasks running in the executor only.
 
 ### UVLoop
 
@@ -127,7 +127,7 @@ executor = AsyncExecutor()
 ```
 
 ### Notes
-- Take into account that asyncio still ([CPython3.11](https://github.com/python/cpython/blob/4664a7cf689946f0c9854cadee7c6aa9c276a8cf/Lib/asyncio/base_events.py#L867))
+- Take into account that asyncio still ([CPython3.13](https://github.com/python/cpython/blob/v3.13.0rc3/Lib/asyncio/base_events.py#L935))
 resolves DNS in threads, not asynchronously
 - Any blocking function will block the whole AsyncExecutor
 

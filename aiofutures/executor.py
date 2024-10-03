@@ -36,26 +36,28 @@ Output:
 """
 import asyncio
 from concurrent.futures import Executor, Future, ThreadPoolExecutor
+from itertools import count
 from threading import Thread, get_ident, main_thread
 from typing import Awaitable, Callable, Optional, Set
 
-from .exceptions import InvalidStateError
+from .exceptions import AsyncExecutorError, InvalidStateError
 
 
 class AsyncExecutor(Executor):
     """The executor that runs coroutines in a different thread."""
     _loop: asyncio.AbstractEventLoop
+    _counter = count()
 
     def __init__(self, executor: Optional[ThreadPoolExecutor] = None) -> None:
         self._loop = asyncio.new_event_loop()
+        self._name = f'{self.__class__.__name__}-{next(self._counter)}'
         self._stopped = False
         self._thread_executor = executor
-        self._thread = Thread(target=self._run, name=self.__class__.__name__, daemon=True)
+        self._thread = Thread(target=self._run, name=self._name, daemon=True)
         self._thread.start()
 
     def __repr__(self) -> str:
-        cls = self.__class__.__name__
-        return f'<{cls} stopped={self._stopped} tasks={len(self.tasks)}>'
+        return f'<{self._name} stopped={self._stopped} tasks={len(self.tasks)}>'
 
     @property
     def tasks(self) -> Set[asyncio.Task]:
@@ -69,7 +71,7 @@ class AsyncExecutor(Executor):
         :param kwargs: kwargs to pass to a task
         """
         if self._stopped:
-            raise InvalidStateError(f'The task was submitted after AsyncExecutor shutdown: {task}')
+            raise InvalidStateError(f'The task has been submitted after AsyncExecutor shutdown: {task}')
         return self._submit(task, *args, **kwargs)
 
     def sync_to_async(self, task: Callable, *args) -> asyncio.Future:
@@ -79,7 +81,7 @@ class AsyncExecutor(Executor):
         :param args: args to pass to a task
         """
         if self._stopped:
-            raise InvalidStateError(f'The task was submitted after AsyncExecutor shutdown: {task}')
+            raise InvalidStateError(f'The task has been submitted after AsyncExecutor shutdown: {task}')
         return self._loop.run_in_executor(self._thread_executor, task, *args)
 
     def shutdown(self, wait: bool = True, cancel_futures: bool = False) -> None:
@@ -110,7 +112,7 @@ class AsyncExecutor(Executor):
 
     def _run(self) -> None:
         if get_ident() == main_thread().ident:
-            raise RuntimeError('AsyncExecutor has been tried to start in the main thread')
+            raise AsyncExecutorError('Async worker has been tried to start in the main thread')
 
         if self._thread_executor:
             self._loop.set_default_executor(self._thread_executor)

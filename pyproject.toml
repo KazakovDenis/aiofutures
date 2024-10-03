@@ -23,7 +23,7 @@ coverage = {extras = ["toml"], version = "^7.2.2"}
 flake8 = "^5"
 isort = "^5.11"
 mypy = "^1.1.1"
-pyproject-flake8 = "^5"
+pyproject-flake8 = "*"
 pytest = "^7"
 
 [build-system]

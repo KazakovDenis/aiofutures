@@ -2,5 +2,9 @@
 from concurrent.futures import CancelledError, TimeoutError  # noqa: F401
 
 
-class InvalidStateError(Exception):
+class AsyncExecutorError(Exception):
+    pass
+
+
+class InvalidStateError(AsyncExecutorError):
     pass
