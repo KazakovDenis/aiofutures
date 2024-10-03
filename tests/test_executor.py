@@ -1,6 +1,10 @@
+import asyncio
+import sys
+
 import pytest
 
 from aiofutures import AsyncExecutor, InvalidStateError, run_async, sync_to_async
+from tests.helpers import run_thread
 
 
 SENTINEL = object()
@@ -57,3 +61,17 @@ def test_submit_after_shutdown(wait, cancel_futures):
     executor.shutdown(wait, cancel_futures)
     with pytest.raises(InvalidStateError):
         executor.submit(async_task)
+
+
+@pytest.mark.parametrize('wait, cancel_futures', [
+    (False, False),
+    (False, True),
+    (True, False),
+    (True, True),
+])
+def test_shutdown_doesnt_freeze(wait, cancel_futures):
+    timeout = sys.getswitchinterval()
+    executor = AsyncExecutor()
+    executor.submit(asyncio.sleep, timeout)
+    t = run_thread(executor.shutdown, wait, cancel_futures)
+    t.join(timeout * 2)
