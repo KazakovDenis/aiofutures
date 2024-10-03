@@ -35,9 +35,8 @@ Output:
     result 2: ((2,), {'b': 2})
 """
 import asyncio
-import time
 from concurrent.futures import Executor, Future, ThreadPoolExecutor
-from threading import Thread
+from threading import Thread, get_ident, main_thread
 from typing import Awaitable, Callable, Optional, Set
 
 from .exceptions import InvalidStateError
@@ -45,23 +44,13 @@ from .exceptions import InvalidStateError
 
 class AsyncExecutor(Executor):
     """The executor that runs coroutines in a different thread."""
-    _loop: asyncio.BaseEventLoop
+    _loop: asyncio.AbstractEventLoop
 
     def __init__(self, executor: Optional[ThreadPoolExecutor] = None) -> None:
-        def run():
-            self._loop = asyncio.new_event_loop()
-            if executor:
-                self._loop.set_default_executor(executor)
-
-            asyncio.set_event_loop(self._loop)
-            try:
-                self._loop.run_forever()
-            finally:
-                self._loop.run_until_complete(self._loop.shutdown_asyncgens())
-                self._loop.close()
-
+        self._loop = asyncio.new_event_loop()
         self._stopped = False
-        self._thread = Thread(target=run, name=self.__class__.__name__, daemon=True)
+        self._thread_executor = executor
+        self._thread = Thread(target=self._run, name=self.__class__.__name__, daemon=True)
         self._thread.start()
 
     def __repr__(self) -> str:
@@ -96,9 +85,6 @@ class AsyncExecutor(Executor):
     def shutdown(self, wait: bool = True, cancel_futures: bool = False) -> None:
         """Stop the executor and cancel tasks if needed.
 
-        `wait=False, cancel_futures=False` will cause freeze of
-        all unfinished tasks, use timeouts invoking their results.
-
         :param wait: wait for tasks to be finished or stop immediately
         :param cancel_futures: notify tasks to be cancelled
         """
@@ -110,27 +96,37 @@ class AsyncExecutor(Executor):
         if cancel_futures:
             self.cancel_futures()
 
-        stopper = self._submit(self._stop, wait)
-        stopper.result()
-        self._thread.join()
+        self._submit(self._stop)
+
+        if wait:
+            # This will wait for all tasks to complete and
+            # a thread pool executor to shut down (see self._run)
+            self._thread.join()
 
     def cancel_futures(self) -> None:
         """Cancel all running tasks."""
         for task in self.tasks:
             task.cancel()
 
-    @property
-    def _thread_executor(self) -> ThreadPoolExecutor:
-        return self._loop._default_executor
+    def _run(self) -> None:
+        if get_ident() == main_thread().ident:
+            raise RuntimeError('AsyncExecutor has been tried to start in the main thread')
+
+        if self._thread_executor:
+            self._loop.set_default_executor(self._thread_executor)
+
+        asyncio.set_event_loop(self._loop)
+        try:
+            self._loop.run_forever()
+        finally:
+            finalizer = asyncio.gather(*self.tasks, return_exceptions=True)
+            self._loop.run_until_complete(finalizer)
+            self._loop.run_until_complete(self._loop.shutdown_asyncgens())
+            self._loop.close()
 
     def _submit(self, task: Callable[..., Awaitable], *args, **kwargs) -> Future:
         coroutine = task(*args, **kwargs)
         return asyncio.run_coroutine_threadsafe(coroutine, self._loop)
 
-    @staticmethod
-    def _release_gil() -> None:
-        """Release the GIL to let async thread make an iteration."""
-        time.sleep(0)
-
-    async def _stop(self, wait: bool = True) -> None:
+    async def _stop(self) -> None:
         self._loop.stop()
