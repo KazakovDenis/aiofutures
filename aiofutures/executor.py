@@ -54,7 +54,11 @@ class AsyncExecutor(Executor):
                 self._loop.set_default_executor(executor)
 
             asyncio.set_event_loop(self._loop)
-            self._loop.run_forever()
+            try:
+                self._loop.run_forever()
+            finally:
+                self._loop.run_until_complete(self._loop.shutdown_asyncgens())
+                self._loop.close()
 
         self._stopped = False
         self._thread = Thread(target=run, name=self.__class__.__name__, daemon=True)
@@ -92,6 +96,9 @@ class AsyncExecutor(Executor):
     def shutdown(self, wait: bool = True, cancel_futures: bool = False) -> None:
         """Stop the executor and cancel tasks if needed.
 
+        `wait=False, cancel_futures=False` will cause freeze of
+        all unfinished tasks, use timeouts invoking their results.
+
         :param wait: wait for tasks to be finished or stop immediately
         :param cancel_futures: notify tasks to be cancelled
         """
@@ -103,19 +110,8 @@ class AsyncExecutor(Executor):
         if cancel_futures:
             self.cancel_futures()
 
-        def has_coroutines() -> bool:
-            return bool(self._loop._ready or self._loop._scheduled)
-
-        if wait:
-            while has_coroutines():
-                self._release_gil()
-
-        self._loop.stop()
-
-        while self._loop.is_running():
-            self._release_gil()
-
-        self._loop.close()
+        stopper = self._submit(self._stop, wait)
+        stopper.result()
         self._thread.join()
 
     def cancel_futures(self) -> None:
@@ -135,3 +131,6 @@ class AsyncExecutor(Executor):
     def _release_gil() -> None:
         """Release the GIL to let async thread make an iteration."""
         time.sleep(0)
+
+    async def _stop(self, wait: bool = True) -> None:
+        self._loop.stop()
