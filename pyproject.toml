@@ -16,15 +16,15 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8.1"
 
 [tool.poetry.group.dev.dependencies]
-coverage = {extras = ["toml"], version = "^7.2.2"}
-flake8 = "^5"
-isort = "^5.11"
-mypy = "^1.1.1"
-pyproject-flake8 = "*"
-pytest = "^7"
+coverage = {extras = ["toml"], version = "*"}
+flake8 = "*"
+isort = "*"
+mypy = "*"
+pyproject-flake8 = ">=7"
+pytest = "*"
 
 [build-system]
 requires = ["poetry-core"]
